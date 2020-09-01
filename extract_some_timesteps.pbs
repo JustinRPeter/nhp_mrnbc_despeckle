@@ -1,0 +1,58 @@
+#!/bin/bash
+
+#PBS -q normal
+#PBS -l walltime=5:00:00
+#PBS -l storage=scratch/er4+gdata/er4+gdata/eg3
+#PBS -N job_extract_timesteps
+#PBS -P er4
+#PBS -l ncpus=16
+#PBS -l mem=128gb
+
+# Usage
+# This job is used to extract a subset of timesteps from a large NetCDF so
+# that we can test with smaller files.
+
+# Fail on first error
+set -e
+
+module load cdo/1.7.2
+
+
+input_dir=/g/data/eg3/jr6311/mrnbc
+output_dir=/g/data/er4/vd5822/files_to_check/mrnbc_speckling/input
+
+start_timestep=1
+end_timestep=100
+
+
+input_file=${input_dir}/pr_mrnbc_CNRM-CM5_rcp85.nc4
+output_file=${output_dir}/pr_mrnbc_CNRM-CM5_rcp85.nc4
+echo "Running on ${input_file}"
+cdo seltimestep,${start_timestep}/${end_timestep} ${input_file} ${output_file}
+
+
+input_file=${input_dir}/rsds_mrnbc_CNRM-CM5_rcp85.nc4
+output_file=${output_dir}/rsds_mrnbc_CNRM-CM5_rcp85.nc4
+echo "Running on ${input_file}"
+cdo seltimestep,${start_timestep}/${end_timestep} ${input_file} ${output_file}
+
+
+input_file=${input_dir}/sfcWind_mrnbc_CNRM-CM5_rcp85.nc4
+output_file=${output_dir}/sfcWind_mrnbc_CNRM-CM5_rcp85.nc4
+echo "Running on ${input_file}"
+cdo seltimestep,${start_timestep}/${end_timestep} ${input_file} ${output_file}
+
+
+input_file=${input_dir}/tasmax_mrnbc_CNRM-CM5_rcp85.nc4
+output_file=${output_dir}/tasmax_mrnbc_CNRM-CM5_rcp85.nc4
+echo "Running on ${input_file}"
+cdo seltimestep,${start_timestep}/${end_timestep} ${input_file} ${output_file}
+
+
+input_file=${input_dir}/tasmin_mrnbc_CNRM-CM5_rcp85.nc4
+output_file=${output_dir}/tasmin_mrnbc_CNRM-CM5_rcp85.nc4
+echo "Running on ${input_file}"
+cdo seltimestep,${start_timestep}/${end_timestep} ${input_file} ${output_file}
+
+
+echo "Job Completed"
