@@ -21,38 +21,38 @@ module load cdo/1.7.2
 input_dir=/g/data/eg3/jr6311/mrnbc
 output_dir=/g/data/er4/vd5822/files_to_check/mrnbc_speckling/input
 
-start_timestep=1
-end_timestep=100
+start_date=20060101
+end_date=20101231
 
 
 input_file=${input_dir}/pr_mrnbc_CNRM-CM5_rcp85.nc4
 output_file=${output_dir}/pr_mrnbc_CNRM-CM5_rcp85.nc4
 echo "Running on ${input_file}"
-cdo seltimestep,${start_timestep}/${end_timestep} ${input_file} ${output_file}
+cdo -f nc4c seldate,${start_date},${end_date} ${input_file} ${output_file}
 
 
 input_file=${input_dir}/rsds_mrnbc_CNRM-CM5_rcp85.nc4
 output_file=${output_dir}/rsds_mrnbc_CNRM-CM5_rcp85.nc4
 echo "Running on ${input_file}"
-cdo seltimestep,${start_timestep}/${end_timestep} ${input_file} ${output_file}
+cdo -f nc4c seldate,${start_date},${end_date} ${input_file} ${output_file}
 
 
 input_file=${input_dir}/sfcWind_mrnbc_CNRM-CM5_rcp85.nc4
 output_file=${output_dir}/sfcWind_mrnbc_CNRM-CM5_rcp85.nc4
 echo "Running on ${input_file}"
-cdo seltimestep,${start_timestep}/${end_timestep} ${input_file} ${output_file}
+cdo -f nc4c seldate,${start_date},${end_date} ${input_file} ${output_file}
 
 
 input_file=${input_dir}/tasmax_mrnbc_CNRM-CM5_rcp85.nc4
 output_file=${output_dir}/tasmax_mrnbc_CNRM-CM5_rcp85.nc4
 echo "Running on ${input_file}"
-cdo seltimestep,${start_timestep}/${end_timestep} ${input_file} ${output_file}
+cdo -f nc4c seldate,${start_date},${end_date} ${input_file} ${output_file}
 
 
 input_file=${input_dir}/tasmin_mrnbc_CNRM-CM5_rcp85.nc4
 output_file=${output_dir}/tasmin_mrnbc_CNRM-CM5_rcp85.nc4
 echo "Running on ${input_file}"
-cdo seltimestep,${start_timestep}/${end_timestep} ${input_file} ${output_file}
+cdo -f nc4c seldate,${start_date},${end_date} ${input_file} ${output_file}
 
 
 echo "Job Completed"
