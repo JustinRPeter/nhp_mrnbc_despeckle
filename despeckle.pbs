@@ -1,0 +1,66 @@
+#!/bin/bash
+
+#PBS -q normal
+#PBS -l walltime=6:00:00
+#PBS -l storage=scratch/er4+gdata/eg3
+#PBS -N job_despeckle
+#PBS -P er4
+#PBS -l ncpus=16
+#PBS -l mem=128gb
+#PBS -l jobfs=300gb
+
+# Usage
+# Set pr, gcm, and rcp, then submit the job
+# This job is used to "despeckle" MRNBC output data
+
+# Fail on first error
+set -e
+
+module load cdo/1.7.2
+
+
+var=pr
+gcm=CNRM-CM5
+rcp=rcp85
+input_dir=/g/data/eg3/jr6311/mrnbc
+output_dir=/scratch/er4/vd5822/mrnbc_speckling/output
+
+
+# Determine the thresholds used to remove values.
+# Need to define two values, min and max, due to use of
+# cdo's setrtomiss operator, which takes a range.
+case ${var} in
+pr)
+    threshold_min=0.009250
+    threshold_max=0.009300;;
+tasmin)
+    threshold_min=333.0
+    threshold_max=334.0;;
+*)
+    echo "Unsupported variable ${var}"
+    exit 1;;
+esac
+
+temp_dir=${PBS_JOBFS}
+input_file=${input_dir}/${var}_mrnbc_${gcm}_${rcp}.nc4
+output_file=${output_dir}/${var}_mrnbc_${gcm}_${rcp}.nc4
+
+echo "Variable: ${var}"
+echo "GCM: ${gcm}"
+echo "RCP: ${rcp}"
+echo "Input file: ${input_file}"
+echo "Output file: ${output_file}"
+echo "Threshold: ${threshold_min} (${threshold_max})"
+echo "Temp Dir: ${temp_dir}"
+
+
+specks_removed_file=${temp_dir}/specks_removed.nc4
+filled_miss_file=${temp_dir}/filled_miss.nc4
+
+echo "Removing cells above threshold ${threshold_min} to ${specks_removed_file}"
+cdo setrtomiss,${threshold_min},${threshold_max} ${input_file} ${specks_removed_file}
+
+echo "Interpolating removed cells to ${output_file}"
+cdo fillmiss ${specks_removed_file} ${output_file}
+
+echo "Job Completed"
