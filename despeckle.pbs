@@ -7,16 +7,16 @@
 #PBS -P er4
 #PBS -l ncpus=16
 #PBS -l mem=128gb
-#PBS -l jobfs=300gb
 
 # Usage
-# Set pr, gcm, and rcp, then submit the job
+# Set pr, gcm, and rcp, then submit the job.
 # This job is used to "despeckle" MRNBC output data
 
 # Fail on first error
 set -e
 
 module load cdo/1.7.2
+module load nco/4.9.2
 
 
 var=pr
@@ -41,10 +41,11 @@ tasmin)
     exit 1;;
 esac
 
-temp_dir=${PBS_JOBFS}
+temp_dir=${output_dir}/${var}_${gcm}_${rcp}
 input_file=${input_dir}/${var}_mrnbc_${gcm}_${rcp}.nc4
 output_file=${output_dir}/${var}_mrnbc_${gcm}_${rcp}.nc4
 
+echo "========================================"
 echo "Variable: ${var}"
 echo "GCM: ${gcm}"
 echo "RCP: ${rcp}"
@@ -52,13 +53,17 @@ echo "Input file: ${input_file}"
 echo "Output file: ${output_file}"
 echo "Threshold: ${threshold_min} (${threshold_max})"
 echo "Temp Dir: ${temp_dir}"
+echo "========================================"
 
+mkdir -p ${temp_dir}
 
 specks_removed_file=${temp_dir}/specks_removed.nc4
-filled_miss_file=${temp_dir}/filled_miss.nc4
 
 echo "Removing cells above threshold ${threshold_min} to ${specks_removed_file}"
 cdo setrtomiss,${threshold_min},${threshold_max} ${input_file} ${specks_removed_file}
+
+echo "Set units attributes to allow interpolation"
+ncatted -a units,lon,c,c,"degrees_east" -a units,lat,c,c,"degrees_north" ${specks_removed_file}
 
 echo "Interpolating removed cells to ${output_file}"
 cdo fillmiss ${specks_removed_file} ${output_file}
