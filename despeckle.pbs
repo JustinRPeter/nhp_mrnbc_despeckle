@@ -23,7 +23,7 @@ var=pr
 gcm=CNRM-CM5
 rcp=rcp85
 input_dir=/g/data/eg3/jr6311/mrnbc
-output_dir=/scratch/er4/vd5822/mrnbc_speckling/output
+output_dir=/scratch/er4/${USER}/mrnbc_speckling/output
 
 
 # Determine the thresholds used to remove values.
