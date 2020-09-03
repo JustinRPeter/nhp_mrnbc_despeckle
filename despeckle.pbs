@@ -41,7 +41,7 @@ tasmin)
     exit 1;;
 esac
 
-temp_dir=${output_dir}/${var}_${gcm}_${rcp}
+temp_dir=${output_dir}/temp_${var}_${gcm}_${rcp}
 input_file=${input_dir}/${var}_mrnbc_${gcm}_${rcp}.nc4
 output_file=${output_dir}/${var}_mrnbc_${gcm}_${rcp}.nc4
 
@@ -67,5 +67,8 @@ ncatted -a units,lon,c,c,"degrees_east" -a units,lat,c,c,"degrees_north" ${speck
 
 echo "Interpolating removed cells to ${output_file}"
 cdo fillmiss ${specks_removed_file} ${output_file}
+
+echo "Removing temporary files"
+rm -rf ${temp_dir}
 
 echo "Job Completed"
