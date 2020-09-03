@@ -9,7 +9,9 @@
 #PBS -l mem=128gb
 
 # Usage
-# Set pr, gcm, and rcp, then submit the job.
+# Set var, gcm, and rcp, then submit the job.
+# Only pr and tasmin are supported at this time, as they are
+# the only variables found to be affected.
 # This job is used to "despeckle" MRNBC output data
 
 # Fail on first error
