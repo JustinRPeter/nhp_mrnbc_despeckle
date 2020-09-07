@@ -10,6 +10,8 @@
 
 # Usage
 # Set var, gcm, and rcp, then submit the job.
+# Can also set preserve_history and output_compressed_netcdf to
+# 0 or 1 to control the output file.
 # Only pr and tasmin are supported at this time, as they are
 # the only variables found to be affected.
 # This job is used to "despeckle" MRNBC output data
@@ -26,6 +28,8 @@ gcm=CNRM-CM5
 rcp=rcp85
 input_dir=/g/data/eg3/jr6311/mrnbc
 output_dir=/scratch/er4/${USER}/mrnbc_speckling/output
+preserve_history=0
+output_compressed_netcdf=1
 
 
 # Determine the thresholds used to remove values.
@@ -54,6 +58,8 @@ echo "RCP: ${rcp}"
 echo "Input file: ${input_file}"
 echo "Output file: ${output_file}"
 echo "Threshold: ${threshold_min} (${threshold_max})"
+echo "Preserve History?: ${preserve_history}"
+echo "Output Compressed NetCDF?: ${output_compressed_netcdf}"
 echo "Temp Dir: ${temp_dir}"
 echo "========================================"
 
@@ -68,7 +74,17 @@ echo "Set units attributes to allow interpolation"
 ncatted -a units,lon,c,c,"degrees_east" -a units,lat,c,c,"degrees_north" ${specks_removed_file}
 
 echo "Interpolating removed cells to ${output_file}"
-cdo fillmiss ${specks_removed_file} ${output_file}
+if [ "${output_compressed_netcdf}" -eq "1" ]; then
+    cdo_compress_arg="-z zip_9"
+else
+    cdo_compress_arg=""
+fi
+cdo -f nc4c ${cdo_compress_arg} fillmiss ${specks_removed_file} ${output_file}
+
+if [ "${preserve_history}" -eq "0" ]; then
+    echo "Removing history attribute on ${output_file}"
+    ncatted -h -a history,global,d,, ${output_file}
+fi
 
 echo "Removing temporary files"
 rm -rf ${temp_dir}
