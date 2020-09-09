@@ -2,7 +2,7 @@
 
 #PBS -q normal
 #PBS -l walltime=6:00:00
-#PBS -l storage=scratch/er4+gdata/eg3
+#PBS -l storage=scratch/er4+gdata/wj02
 #PBS -N job_despeckle
 #PBS -P er4
 #PBS -l ncpus=16
@@ -14,7 +14,10 @@
 # 0 or 1 to control the output file.
 # Only pr and tasmin are supported at this time, as they are
 # the only variables found to be affected.
-# This job is used to "despeckle" MRNBC output data
+# This job is used to "despeckle" MRNBC output data that has
+# already gone through compliance checker. It is intended that the
+# input file in wj02 COMPLIANT is replaced with the output of
+# this job by manually copying over.
 
 # Fail on first error
 set -e
@@ -24,9 +27,9 @@ module load nco/4.9.2
 
 
 var=pr
-gcm=CNRM-CM5
-rcp=rcp85
-input_dir=/g/data/eg3/jr6311/mrnbc
+gcm=ACCESS1-0
+rcp=rcp45
+input_dir=/g/data/wj02/COMPLIANT/HMINPUT/output/AUS-5/BoM
 output_dir=/scratch/er4/${USER}/mrnbc_speckling/output
 preserve_history=0
 output_compressed_netcdf=1
@@ -35,6 +38,8 @@ output_compressed_netcdf=1
 # Determine the thresholds used to remove values.
 # Need to define two values, min and max, due to use of
 # cdo's setrtomiss operator, which takes a range.
+# These threshold values were determined by inspecting the
+# affected files.
 case ${var} in
 pr)
     threshold_min=0.009250
@@ -47,9 +52,36 @@ tasmin)
     exit 1;;
 esac
 
+# Determine GCM institute
+case ${gcm} in
+ACCESS1-0)
+    gcm_inst=CSIRO-BOM;;
+CNRM-CM5)
+    gcm_inst=CNRM-CERFACS;;
+GFDL-ESM2M)
+    gcm_inst=NOAA-GFDL;;
+MIROC5)
+    gcm_inst=MIROC;;
+*)
+    echo "Institute undefined for GCM ${gcm}"
+    exit 1;;
+esac
+
+# Determine period
+case ${rcp} in
+historical)
+    period=19600101-20051231;;
+rcp45|rcp85)
+    period=20060101-20991231;;
+*)
+    echo "Unsupported rcp ${rcp}"
+    exit 1;;
+esac
+
 temp_dir=${output_dir}/temp_${var}_${gcm}_${rcp}
-input_file=${input_dir}/${var}_mrnbc_${gcm}_${rcp}.nc4
-output_file=${output_dir}/${var}_mrnbc_${gcm}_${rcp}.nc4
+file_base_name=${var}_AUS-5_${gcm_inst}-${gcm}_${rcp}_r1i1p1_r240x120-MRNBC-AWAP_v1_day_${period}.nc
+input_file=${input_dir}/${gcm_inst}-${gcm}/${rcp}/r1i1p1/r240x120-MRNBC-AWAP/latest/day/${var}/${file_base_name}
+output_file=${output_dir}/${file_base_name}
 
 echo "========================================"
 echo "Variable: ${var}"
