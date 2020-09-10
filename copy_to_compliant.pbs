@@ -1,0 +1,99 @@
+#!/bin/bash
+
+#PBS -q normal
+#PBS -l walltime=6:00:00
+#PBS -l storage=scratch/er4+gdata/wj02
+#PBS -N job_copy_to_compliant
+#PBS -P er4
+#PBS -l ncpus=16
+#PBS -l mem=128gb
+
+# Usage
+# This job copies the output of despeckle.pbs back to wj02 COMPLIANT.
+# Use the copy_to_compliant() function, passing variable, gcm, and rcp.
+# e.g.
+# copy_to_compliant pr ACCESS1-0 rcp45
+#
+# Compliant filenames are assumed on both the source and destination.
+# Compliant folder names is assumed on the destination, but not the source.
+# If a source file doesn't exist, it is skipped (instead of failing).
+# If the destination file exists, it is skipped (instead of failing).
+
+# Fail on first error
+set -e
+
+input_dir=/scratch/er4/${USER}/mrnbc_speckling/output
+output_dir=/g/data/wj02/COMPLIANT/HMINPUT/output/AUS-5/BoM
+
+copy_to_compliant() {
+    local var=$1
+    local gcm=$2
+    local rcp=$3
+
+    # Determine GCM institute
+    case ${gcm} in
+    ACCESS1-0)
+        local gcm_inst=CSIRO-BOM;;
+    CNRM-CM5)
+        local gcm_inst=CNRM-CERFACS;;
+    GFDL-ESM2M)
+        local gcm_inst=NOAA-GFDL;;
+    MIROC5)
+        local gcm_inst=MIROC;;
+    *)
+        echo "Institute undefined for GCM ${gcm}"
+        exit 1;;
+    esac
+
+    # Determine period
+    case ${rcp} in
+    historical)
+        local period=19600101-20051231;;
+    rcp45|rcp85)
+        local period=20060101-20991231;;
+    *)
+        echo "Unsupported rcp ${rcp}"
+        exit 1;;
+    esac
+
+    local file_base_name=${var}_AUS-5_${gcm_inst}-${gcm}_${rcp}_r1i1p1_r240x120-MRNBC-AWAP_v1_day_${period}.nc
+    local src_file=${input_dir}/${file_base_name}
+    local dest_file=${output_dir}/${gcm_inst}-${gcm}/${rcp}/r1i1p1/r240x120-MRNBC-AWAP/latest/day/${var}/${file_base_name}
+
+    if [ ! -f ${src_file} ]; then
+        echo "***** Skipped ${var} ${gcm} ${rcp}"
+        echo "***** Source file doesn't exist: ${src_file}"
+        echo ""
+        return 0
+    fi
+
+    if [ -f ${dest_file} ]; then
+        echo "***** Skipped ${var} ${gcm} ${rcp}"
+        echo "***** Destination already exists: ${dest_file}"
+        echo ""
+        return 0
+    fi
+
+    echo "Copying from ${src_file} to ${dest_file}"
+    cp ${src_file} ${dest_file}
+}
+
+copy_to_compliant pr ACCESS1-0 rcp45
+copy_to_compliant pr ACCESS1-0 rcp85
+copy_to_compliant pr CNRM-CM5 rcp45
+copy_to_compliant pr CNRM-CM5 rcp85
+copy_to_compliant pr GFDL-ESM2M rcp45
+copy_to_compliant pr GFDL-ESM2M rcp85
+copy_to_compliant pr MIROC5 rcp45
+copy_to_compliant pr MIROC5 rcp85
+copy_to_compliant tasmin ACCESS1-0 rcp45
+copy_to_compliant tasmin ACCESS1-0 rcp85
+copy_to_compliant tasmin CNRM-CM5 rcp45
+copy_to_compliant tasmin CNRM-CM5 rcp85
+copy_to_compliant tasmin GFDL-ESM2M rcp45
+copy_to_compliant tasmin GFDL-ESM2M rcp85
+copy_to_compliant tasmin MIROC5 rcp45
+copy_to_compliant tasmin MIROC5 rcp85
+
+
+echo "Job Completed"
