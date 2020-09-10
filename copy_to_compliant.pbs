@@ -1,12 +1,11 @@
 #!/bin/bash
 
-#PBS -q normal
+#PBS -q copyq
 #PBS -l walltime=6:00:00
 #PBS -l storage=scratch/er4+gdata/wj02
 #PBS -N job_copy_to_compliant
 #PBS -P er4
-#PBS -l ncpus=16
-#PBS -l mem=128gb
+#PBS -l mem=16gb
 
 # Usage
 # This job copies the output of despeckle.pbs back to wj02 COMPLIANT.
