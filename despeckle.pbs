@@ -68,6 +68,7 @@ echo "Output Compressed NetCDF?: ${output_compressed_netcdf}"
 echo "Temp Dir: ${temp_dir}"
 echo "========================================"
 
+mkdir -p ${output_dir}
 mkdir -p ${temp_dir}
 
 specks_removed_file=${temp_dir}/specks_removed.nc4
