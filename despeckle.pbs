@@ -30,7 +30,7 @@ rcp=rcp45
 input_base_dir=/scratch/eg3/${USER}/mrnbc_stitching/final_stitch
 output_base_dir=/scratch/eg3/${USER}/mrnbc_speckling
 preserve_history=0
-output_compressed_netcdf=1
+output_compressed_netcdf=0
 
 
 # Determine the thresholds used to remove values.
