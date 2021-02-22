@@ -1,0 +1,97 @@
+#!/bin/bash
+
+#PBS -q normal
+#PBS -l walltime=6:00:00
+#PBS -l storage=scratch/eg3
+#PBS -N job_despeckle
+#PBS -P er4
+#PBS -l ncpus=16
+#PBS -l mem=128gb
+
+# Usage
+# Set var, gcm, and rcp, then submit the job.
+# Can also set preserve_history and output_compressed_netcdf to
+# 0 or 1 to control the output file.
+# Only pr and tasmin are supported at this time, as they are
+# the only variables found to be affected.
+# This job is used to "despeckle" MRNBC output data that has been stitched,
+# but before having gone through compliance checker.
+
+# Fail on first error
+set -e
+
+module load cdo/1.7.2
+module load nco/4.9.2
+
+
+var=pr
+gcm=ACCESS1-0
+rcp=rcp45
+input_base_dir=/scratch/eg3/${USER}/mrnbc_stitching/final_stitch
+output_base_dir=/scratch/eg3/${USER}/mrnbc_speckling
+preserve_history=0
+output_compressed_netcdf=1
+
+
+# Determine the thresholds used to remove values.
+# Need to define two values, min and max, due to use of
+# cdo's setrtomiss operator, which takes a range.
+# These threshold values were determined by inspecting the
+# affected files.
+case ${var} in
+pr)
+    threshold_min=0.011500
+    threshold_max=0.011600;;
+tasmin)
+    threshold_min=338.0
+    threshold_max=339.0;;
+*)
+    echo "Unsupported variable ${var}"
+    exit 1;;
+esac
+
+temp_dir=${output_base_dir}/temp_${var}_${gcm}_${rcp}
+file_base_name=${var}_mrnbc_${gcm}_${rcp}.nc4
+input_file=${input_base_dir}/${gcm}/${rcp}/${file_base_name}
+output_dir=${output_base_dir}/${gcm}/${rcp}
+output_file=${output_dir}/${file_base_name}
+
+echo "========================================"
+echo "Variable: ${var}"
+echo "GCM: ${gcm}"
+echo "RCP: ${rcp}"
+echo "Input file: ${input_file}"
+echo "Output file: ${output_file}"
+echo "Threshold: ${threshold_min} (${threshold_max})"
+echo "Preserve History?: ${preserve_history}"
+echo "Output Compressed NetCDF?: ${output_compressed_netcdf}"
+echo "Temp Dir: ${temp_dir}"
+echo "========================================"
+
+mkdir -p ${temp_dir}
+
+specks_removed_file=${temp_dir}/specks_removed.nc4
+
+echo "Removing cells above threshold ${threshold_min} to ${specks_removed_file}"
+cdo setrtomiss,${threshold_min},${threshold_max} ${input_file} ${specks_removed_file}
+
+echo "Set units attributes to allow interpolation"
+ncatted -a units,lon,c,c,"degrees_east" -a units,lat,c,c,"degrees_north" ${specks_removed_file}
+
+echo "Interpolating removed cells to ${output_file}"
+if [ "${output_compressed_netcdf}" -eq "1" ]; then
+    cdo_compress_arg="-z zip_9"
+else
+    cdo_compress_arg=""
+fi
+cdo -f nc4c ${cdo_compress_arg} fillmiss ${specks_removed_file} ${output_file}
+
+if [ "${preserve_history}" -eq "0" ]; then
+    echo "Removing history attribute on ${output_file}"
+    ncatted -h -a history,global,d,, ${output_file}
+fi
+
+echo "Removing temporary files"
+rm -rf ${temp_dir}
+
+echo "Job Completed"
