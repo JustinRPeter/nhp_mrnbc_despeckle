@@ -19,7 +19,7 @@ module load cdo/1.7.2
 
 
 input_dir=/g/data/eg3/jr6311/mrnbc
-output_dir=/g/data/er4/vd5822/files_to_check/mrnbc_speckling/input
+output_dir=/g/data/er4/vd5822/files_to_check/mrnbc_despeckling/input
 
 start_date=20060101
 end_date=20101231

@@ -30,7 +30,7 @@ var=pr
 gcm=ACCESS1-0
 rcp=rcp45
 input_dir=/g/data/wj02/COMPLIANT/HMINPUT/output/AUS-5/BoM
-output_dir=/scratch/er4/${USER}/mrnbc_speckling/output
+output_dir=/scratch/er4/${USER}/mrnbc_despeckling/output
 preserve_history=0
 output_compressed_netcdf=1
 

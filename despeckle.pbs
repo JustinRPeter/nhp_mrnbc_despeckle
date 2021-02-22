@@ -28,7 +28,7 @@ var=pr
 gcm=ACCESS1-0
 rcp=rcp45
 input_base_dir=/scratch/eg3/${USER}/mrnbc_stitching/final_stitch
-output_base_dir=/scratch/eg3/${USER}/mrnbc_speckling
+output_base_dir=/scratch/eg3/${USER}/mrnbc_despeckling
 preserve_history=0
 output_compressed_netcdf=0
 
