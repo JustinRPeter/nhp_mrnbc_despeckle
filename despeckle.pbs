@@ -38,6 +38,10 @@ output_compressed_netcdf=0
 # cdo's setrtomiss operator, which takes a range.
 # These threshold values were determined by inspecting the
 # affected files.
+# pr and tasmin are explicitiy supported because they are known
+# to be affected.
+# For other variables, the threshold is set to a high number, so
+# that the job can be used to effecitvely fill in any NaNs.
 case ${var} in
 pr)
     threshold_min=0.011500
@@ -46,8 +50,8 @@ tasmin)
     threshold_min=338.0
     threshold_max=339.0;;
 *)
-    echo "Unsupported variable ${var}"
-    exit 1;;
+    threshold_min=10000000
+    threshold_max=10000001;;
 esac
 
 temp_dir=${output_base_dir}/temp_${var}_${gcm}_${rcp}
