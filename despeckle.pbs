@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #PBS -q normal
-#PBS -l walltime=6:00:00
+#PBS -l walltime=2:00:00
 #PBS -l storage=scratch/eg3
 #PBS -N job_despeckle
 #PBS -P er4
